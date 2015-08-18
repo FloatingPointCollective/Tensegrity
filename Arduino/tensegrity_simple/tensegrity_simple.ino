@@ -28,6 +28,7 @@ NeoPixelBus strip = NeoPixelBus(12, 13);
 void setup() {
   //Debug serial port
   Serial.begin(9600);
+  
   Serial.println("");
 
   chip_ID = ESP.getChipId();
@@ -81,10 +82,12 @@ void loop() {
 
   //set led colors
   for (unsigned i=0;i<12;++i){
-      Serial.println("set led #"+i);
+      Serial.println("set led #");
+      Serial.println(i);
       strip.SetPixelColor(i, RgbColor(255, 255, 255));
   }
   
+  strip.Show();
 }
 
 void i2c_scan(){
