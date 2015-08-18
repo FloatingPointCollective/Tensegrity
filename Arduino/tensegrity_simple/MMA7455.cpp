@@ -1,3 +1,4 @@
+//DOCUMENTATION HERE: https://code.google.com/p/mma-7455-arduino-library/
 // MMA_7455.cpp - 3 Axis Accelerometer Library
 // Moritz Kemper, IAD Physical Computing Lab
 // moritz.kemper@zhdk.ch

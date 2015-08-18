@@ -64,7 +64,7 @@ void setup() {
 }
 
 void loop() {
-  Serial.println("looping");
+  //Serial.println("looping");
   // put your main code here, to run repeatedly:
   if(accelerometer_available){
     //get new accelerometer data
@@ -78,13 +78,33 @@ void loop() {
     dX = (int16_t) x;//    / 64.0;          // calculate the 'g' values.
     dY = (int16_t) y;// / 64.0;
     dZ = (int16_t) z;// / 64.0;
+
+    //perform some calculations on the raw values
+    dX = abs(dX);
+    dY = abs(dY);
+    dZ = abs(dZ);
+    ////cap values at 255
+    dX = constrain(dX,0,255);
+    dY = constrain(dY,0,255);
+    dZ = constrain(dZ,0,255);
+    
+    Serial.print("dX: ");
+    Serial.print(dX);
+    Serial.print("  dY: ");
+    Serial.print(dY);
+    Serial.print("  dZ: ");
+    Serial.println(dZ);
   }
 
-  //set led colors
-  for (unsigned i=0;i<12;++i){
-      Serial.println("set led #");
-      Serial.println(i);
-      strip.SetPixelColor(i, RgbColor(255, 255, 255));
+  //set led colors for cap 1
+  for (unsigned i=0;i<6;++i){
+      strip.SetPixelColor(i, RgbColor(dX, dY, dZ));
+  }
+
+  //set led colors for cap 2
+  //apply "inverse" color to second cap
+  for (unsigned i=6;i<12;++i){
+      strip.SetPixelColor(i, RgbColor(dX, dY, dZ));
   }
   
   strip.Show();
