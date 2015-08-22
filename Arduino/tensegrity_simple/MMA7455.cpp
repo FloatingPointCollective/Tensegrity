@@ -34,11 +34,11 @@ void MMA_7455::initSensitivity(int sensitivity)
   }
   if(sensitivity == 4)
   {
-    Wire.write(MMA_7455_2G_MODE);  //Set Sensitivity to 4g Detection
+    Wire.write(MMA_7455_4G_MODE);  //Set Sensitivity to 4g Detection
   }
   if(sensitivity == 8)
   {
-    Wire.write(MMA_7455_2G_MODE);  //Set Sensitivity to 8g Detection
+    Wire.write(MMA_7455_8G_MODE);  //Set Sensitivity to 8g Detection
   }
   Wire.endTransmission();
   delay(1000);

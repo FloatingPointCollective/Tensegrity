@@ -16,6 +16,7 @@ MMA_7455 mySensor = MMA_7455(); //Make an instance of MMA_7455
 int accelerometer_available = 0;
 bool has_accelerometer = 0;
 double dX,dY,dZ; //accelerometer g
+double xOff, yOff, zOff; //offsets for axes
 int16_t x,y,z; //raw accelerometer data
 
 //Define pins
@@ -29,6 +30,7 @@ float s2 = 0;
 float s3 = 0;
 float sinSpeed = .5;
 
+bool first = true;
 
 void setup() {
   //Debug serial port
@@ -57,6 +59,17 @@ void setup() {
         } else {
           Serial.println("Accelerometer initialized successfully");
           accelerometer_available = 1;
+          // Calibrate the Offset, that values corespond in 
+          // flat position to: xVal = -30, yVal = -20, zVal = +20
+          // !!!Activate this after having the first values read out!!!
+         //  mySensor.readAllAxes(&x, &y, &z);
+        /*  // The function MMA7455_xyz returns the 'g'-force 
+          // as an integer in 64 per 'g'.
+          // set x,y,z to zero (they are not written in case of an error).
+          dX = (int16_t) x;//    / 64.0;          // calculate the 'g' values.
+          dY = (int16_t) y;// / 64.0;
+          dZ = (int16_t) z;// / 64.0;
+          mySensor.calibrateOffset(dX, dY, dZ);*/
         }
   } else {
         Serial.println("Accelerometer not available");
@@ -68,10 +81,36 @@ void setup() {
 
 }
 
+
+void calibrate(){
+  Serial.println("calibrate!");
+   // Calibrate the Offset, that values corespond in 
+    // flat position to: xVal = -30, yVal = -20, zVal = +20
+    // !!!Activate this after having the first values read out!!!
+     mySensor.readAllAxes(&x, &y, &z);
+    // The function MMA7455_xyz returns the 'g'-force 
+    // as an integer in 64 per 'g'.
+    // set x,y,z to zero (they are not written in case of an error).
+    xOff = (int16_t) x;// / 64.0;          // calculate the 'g' values.
+    yOff = (int16_t) y;// / 64.0;
+    zOff = (int16_t) z;// / 64.0;
+    
+    //this does not seem to do anything :( i might need to creat my own calibration script
+   // mySensor.calibrateOffset(dX, dY, dZ);
+}
+
 void loop() {
   //Serial.println("looping");
   // put your main code here, to run repeatedly:
   if(accelerometer_available){
+
+    Serial.print("first?");
+    Serial.println(first);
+    if(first){
+      calibrate();
+      first = false;
+    }
+    
     //get new accelerometer data
     int error;
     x = y = z = 0;
@@ -80,18 +119,29 @@ void loop() {
     // The function MMA7455_xyz returns the 'g'-force 
     // as an integer in 64 per 'g'.
     // set x,y,z to zero (they are not written in case of an error).
-    dX = (int16_t) x;//    / 64.0;          // calculate the 'g' values.
+    
+    dX = (int16_t) x;// / 64.0;          // calculate the 'g' values.
     dY = (int16_t) y;// / 64.0;
     dZ = (int16_t) z;// / 64.0;
 
     //perform some calculations on the raw values
-    dX = abs(dX);
-    dY = abs(dY);
-    dZ = abs(dZ);
+   /* dX -= xOff;
+    dY -= yOff;
+    dZ -= zOff;
+
+    int defaultBrightness = 150;
+
+    dX += defaultBrightness;
+    dY += defaultBrightness;
+    dZ += defaultBrightness;*/
+    
+    //dX = abs(dX);
+    //dY = abs(dY);
+    //dZ = abs(dZ);
     ////cap values at 255
-    dX = constrain(dX,0,255);
-    dY = constrain(dY,0,255);
-    dZ = constrain(dZ,0,255);
+  //  dX = constrain(dX,0,255);
+  //  dY = constrain(dY,0,255);
+  //  dZ = constrain(dZ,0,255);
     
     Serial.print("dX: ");
     Serial.print(dX);
@@ -125,6 +175,9 @@ void loop() {
 
 int getColorValue(int index, int numPixels, float sine, double d){
 
+    d = abs(d);
+    d = constrain(d, 0, 255);
+
   //2 radians in a circle...
   float offSet = ((float)index/(float)numPixels)*4;
  // Serial.print("offset");
@@ -147,11 +200,11 @@ int getColorValue(int index, int numPixels, float sine, double d){
   
   //remap sine value range to effect the color value slightly only 
   float r =  round(mappedSine * d);
-  //r = constrain(mappedSine,0, 255);
+//  r = constrain(mappedSine, 0, 255);
 
-/*
+
   Serial.print("r: ");
-  Serial.println(r);*/
+  Serial.println(r);
 
  // delay(100);
   
