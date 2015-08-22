@@ -27,7 +27,7 @@ NeoPixelBus strip = NeoPixelBus(12, 13);
 float s1 = 0;
 float s2 = 0;
 float s3 = 0;
-float sinSpeed = 2;
+float sinSpeed = .5;
 
 
 void setup() {
@@ -108,21 +108,13 @@ void loop() {
       int g = getColorValue(i, np, s1, dY);
       int b = getColorValue(i, np, s1, dZ);
       
+      //cap 1
       strip.SetPixelColor(i,RgbColor(r, g, b));
-      
-      //strip.SetPixelColor(i, RgbColor(dX, dY, dZ));
+      //cap 2
+      strip.SetPixelColor(i+6,RgbColor(r, g, b));
       
   }
 
-  //set led colors for cap 2
-  //apply "inverse" color to second cap
-  for (unsigned i=6;i<12;++i){
-     // Serial.print("sine: ");
-     // Serial.println(sin(s1));
-      strip.SetPixelColor(i, RgbColor(dX, dY, dZ));
-  }
-
-//  sinSpeed /= 20;
   
   s1+= .02 * sinSpeed;
   s2+= .03 * sinSpeed;
@@ -133,7 +125,12 @@ void loop() {
 
 int getColorValue(int index, int numPixels, float sine, double d){
 
-  double sineVal = sin(sine * index/numPixels);
+  //2 radians in a circle...
+  float offSet = ((float)index/(float)numPixels)*4;
+ // Serial.print("offset");
+ // Serial.println(offSet);
+
+  double sineVal = sin(sine + offSet);
 
   //float mappedSineVal = map(sineVal, -1, 1, .9, 1);
   float mappedSine = sineVal+1;
