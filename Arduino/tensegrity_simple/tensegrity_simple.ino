@@ -23,11 +23,16 @@ const int sda = 14;
 
 //LED stuff
 NeoPixelBus strip = NeoPixelBus(12, 13);
+////sine waves
+float s1 = 0;
+float s2 = 0;
+float s3 = 0;
+float sinSpeed = 2;
 
 
 void setup() {
   //Debug serial port
-  Serial.begin(9600);
+  Serial.begin(230400);
   
   Serial.println("");
 
@@ -97,17 +102,63 @@ void loop() {
   }
 
   //set led colors for cap 1
+  int np = 6;
   for (unsigned i=0;i<6;++i){
-      strip.SetPixelColor(i, RgbColor(dX, dY, dZ));
+      int r = getColorValue(i, np, s1, dX);
+      int g = getColorValue(i, np, s1, dY);
+      int b = getColorValue(i, np, s1, dZ);
+      
+      strip.SetPixelColor(i,RgbColor(r, g, b));
+      
+      //strip.SetPixelColor(i, RgbColor(dX, dY, dZ));
+      
   }
 
   //set led colors for cap 2
   //apply "inverse" color to second cap
   for (unsigned i=6;i<12;++i){
+     // Serial.print("sine: ");
+     // Serial.println(sin(s1));
       strip.SetPixelColor(i, RgbColor(dX, dY, dZ));
   }
+
+//  sinSpeed /= 20;
+  
+  s1+= .02 * sinSpeed;
+  s2+= .03 * sinSpeed;
+  s3+= .04 * sinSpeed;
   
   strip.Show();
+}
+
+int getColorValue(int index, int numPixels, float sine, double d){
+
+  double sineVal = sin(sine * index/numPixels);
+
+  //float mappedSineVal = map(sineVal, -1, 1, .9, 1);
+  float mappedSine = sineVal+1;
+
+/*
+  Serial.print("sineVal: ");
+  Serial.println(sineVal);
+  
+  Serial.print("mappedSineVal: ");
+  Serial.println(mappedSine);
+
+  Serial.print("d: ");
+  Serial.println(d);*/
+  
+  //remap sine value range to effect the color value slightly only 
+  float r =  round(mappedSine * d);
+  //r = constrain(mappedSine,0, 255);
+
+/*
+  Serial.print("r: ");
+  Serial.println(r);*/
+
+ // delay(100);
+  
+  return r;
 }
 
 void i2c_scan(){
