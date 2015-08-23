@@ -31,8 +31,7 @@ const int sda = 14;
 NeoPixelBus strip = NeoPixelBus(12, 13);
 ////sine waves
 float s1 = 0;
-float s2 = 0;
-float s3 = 0;
+//float TWO_PI = 6.28318530718;
 
 bool first = 1;
 
@@ -172,6 +171,13 @@ void loop() {
 
   
   s1+= .02 * sinSpeed;
+
+  //reset when it reaches 2PI, we don't need to go higher than this, it's just looping around the circle now
+  if(s1 >= TWO_PI){
+   // Serial.print("s1: ");
+   // Serial.println(s1);
+    s1 -= TWO_PI;
+  }
   
   strip.Show();
 }
