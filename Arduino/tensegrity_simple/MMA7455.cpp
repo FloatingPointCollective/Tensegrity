@@ -106,6 +106,11 @@ void MMA_7455::readAllAxes(int16_t* x, int16_t* y, int16_t* z)
   *x = (((uint16_t)data[1])<<8) | data[0];
   *y = (((uint16_t)data[3])<<8) | data[2];
   *z = (((uint16_t)data[5])<<8) | data[4];
+
+  *x += _x_axis_offset;
+  *y += _y_axis_offset;
+  *z += _z_axis_offset;
+  
   if(*x>511){
     *x -= 1024;
   }

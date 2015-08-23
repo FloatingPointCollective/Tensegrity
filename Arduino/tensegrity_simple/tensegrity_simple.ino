@@ -2,6 +2,11 @@
 #include "MMA7455.h"
 #include <Wire.h>         //I2C
 
+//SETTINGS
+float colorPhase = .1;  //set phase offset on the RGB channels
+float sinSpeed = .5;    //set the frequency of the sinte wave
+float brightness = 20; //0-255 // this is the default brightness
+
 //LED libs
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
@@ -28,9 +33,8 @@ NeoPixelBus strip = NeoPixelBus(12, 13);
 float s1 = 0;
 float s2 = 0;
 float s3 = 0;
-float sinSpeed = .5;
 
-bool first = true;
+bool first = 1;
 
 void setup() {
   //Debug serial port
@@ -83,7 +87,7 @@ void setup() {
 
 
 void calibrate(){
-  Serial.println("calibrate!");
+    Serial.println("calibrate!");
    // Calibrate the Offset, that values corespond in 
     // flat position to: xVal = -30, yVal = -20, zVal = +20
     // !!!Activate this after having the first values read out!!!
@@ -91,12 +95,12 @@ void calibrate(){
     // The function MMA7455_xyz returns the 'g'-force 
     // as an integer in 64 per 'g'.
     // set x,y,z to zero (they are not written in case of an error).
-    xOff = (int16_t) x;// / 64.0;          // calculate the 'g' values.
-    yOff = (int16_t) y;// / 64.0;
-    zOff = (int16_t) z;// / 64.0;
+    xOff = (int16_t) x; // / 64.0;          // calculate the 'g' values.
+    yOff = (int16_t) y; // / 64.0;
+    zOff = (int16_t) z; // / 64.0;
     
     //this does not seem to do anything :( i might need to creat my own calibration script
-   // mySensor.calibrateOffset(dX, dY, dZ);
+    mySensor.calibrateOffset(-xOff, -yOff, -zOff);
 }
 
 void loop() {
@@ -104,11 +108,12 @@ void loop() {
   // put your main code here, to run repeatedly:
   if(accelerometer_available){
 
-    Serial.print("first?");
-    Serial.println(first);
+   // Serial.print("first?");
+   // Serial.println(first);
+    
     if(first){
       calibrate();
-      first = false;
+      first = 0;
     }
     
     //get new accelerometer data
@@ -142,7 +147,7 @@ void loop() {
   //  dX = constrain(dX,0,255);
   //  dY = constrain(dY,0,255);
   //  dZ = constrain(dZ,0,255);
-    
+   
     Serial.print("dX: ");
     Serial.print(dX);
     Serial.print("  dY: ");
@@ -154,9 +159,9 @@ void loop() {
   //set led colors for cap 1
   int np = 6;
   for (unsigned i=0;i<6;++i){
-      int r = getColorValue(i, np, s1, dX);
-      int g = getColorValue(i, np, s1, dY);
-      int b = getColorValue(i, np, s1, dZ);
+      int r = getColorValue(i, np, s1, dX, 0);
+      int g = getColorValue(i, np, s1, dY, 1);
+      int b = getColorValue(i, np, s1, dZ, 2);
       
       //cap 1
       strip.SetPixelColor(i,RgbColor(r, g, b));
@@ -173,13 +178,14 @@ void loop() {
   strip.Show();
 }
 
-int getColorValue(int index, int numPixels, float sine, double d){
+int getColorValue(int index, int numPixels, float sine, double d, int channel){
 
     d = abs(d);
+    d += brightness;
     d = constrain(d, 0, 255);
 
   //2 radians in a circle...
-  float offSet = ((float)index/(float)numPixels)*4;
+  float offSet = ((float)index/(float)numPixels)*4 + ((float)channel*colorPhase);
  // Serial.print("offset");
  // Serial.println(offSet);
 
@@ -203,8 +209,8 @@ int getColorValue(int index, int numPixels, float sine, double d){
 //  r = constrain(mappedSine, 0, 255);
 
 
-  Serial.print("r: ");
-  Serial.println(r);
+  //Serial.print("r: ");
+ // Serial.println(r);
 
  // delay(100);
   
