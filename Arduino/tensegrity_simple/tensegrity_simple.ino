@@ -5,7 +5,7 @@
 //SETTINGS
 float colorPhase = .1;  //set phase offset on the RGB channels
 float sinSpeed = .5;    //set the frequency of the sinte wave
-float brightness = 20; //0-255 // this is the default brightness
+float colorFactor = 3;  //extent to which the accelorometer data effect the color, higher value = more color shifting
 
 //LED libs
 #include <NeoPixelBus.h>
@@ -172,8 +172,6 @@ void loop() {
 
   
   s1+= .02 * sinSpeed;
-  s2+= .03 * sinSpeed;
-  s3+= .04 * sinSpeed;
   
   strip.Show();
 }
@@ -181,7 +179,8 @@ void loop() {
 int getColorValue(int index, int numPixels, float sine, double d, int channel){
 
     d = abs(d);
-    d += brightness;
+    //d += brightness;
+    d = 255 - d*colorFactor;
     d = constrain(d, 0, 255);
 
   //2 radians in a circle...
@@ -192,7 +191,8 @@ int getColorValue(int index, int numPixels, float sine, double d, int channel){
   double sineVal = sin(sine + offSet);
 
   //float mappedSineVal = map(sineVal, -1, 1, .9, 1);
-  float mappedSine = sineVal+1;
+  float mappedSine = (sineVal+1)/2;
+  //mappedSine *= brightnessFactor;
 
 /*
   Serial.print("sineVal: ");
@@ -206,7 +206,7 @@ int getColorValue(int index, int numPixels, float sine, double d, int channel){
   
   //remap sine value range to effect the color value slightly only 
   float r =  round(mappedSine * d);
-//  r = constrain(mappedSine, 0, 255);
+  r = constrain(r, 0, 255);
 
 
   //Serial.print("r: ");
